@@ -1,0 +1,26 @@
+---
+- hosts: localhost
+  sudo: yes
+  tasks:
+  - name: install java on apache
+    apt: name=openjdk-8-jdk state=present
+  - name: download tomcat
+    get_url: url=http://mirrors.estointernet.in/apache/tomcat/tomcat-8/v8.5.43/bin/apache-tomcat-8.5.43.tar.gz dest=/home/ansible
+  - name: extract file of tomcat
+    command: tar xvf apache-tomcat-8.5.43.tar.gz
+  - name: change the tomcat name
+    command: mv apache-tomcat-8.5.43 tomcat
+  - name: change owner ship of tomcat
+    file: path=/home/ansible/tomcat owner=ansible group=ansible mode=775 state=directory recurse=yes
+  - name: copy tomcat users file 
+    command: cp -f /home/ansible/tomcat-users.xml /home/ansible/tomcat/conf/
+  - name: copy webapps webapps/manager/META-INF/context.xml
+    command: cp -f /home/ansible/context.xml /home/ansible/tomcat/webapps/manager/META-INF/ 
+  - name: copy ing file webapps/host-manager/META-INF/context.xml   
+    command: cp -f /home/ansible/context.xml /home/ansible/tomcat/webapps/host-manager/META-INF/
+  - name: copy war file
+    command: cp /home/ansible/time-tracker-web-0.5.0-SNAPSHOT.war /home/ansible/tomcat/webapps/
+  - name: start tomcat
+    command: nohup /home/ansible/tomcat/bin/startup.sh
+    become: true
+    become_user: ansible
